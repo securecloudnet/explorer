@@ -5,15 +5,15 @@
 */
 {
   // name your instance!
-  "title": "Northern Explorer",
+  "title": "SecureCloud Explorer",
 
   "address": "127.0.0.1:3001",
 
   // coin name
-  "coin": "Northern",
+  "coin": "SecureCloud",
 
   // coin symbol
-  "symbol": "NORT",
+  "symbol": "SCN",
 
   // logo
   "logo": "/images/logo.png",
@@ -26,7 +26,7 @@
   //     Cerulean, Cosmo, Cyborg, Darkly, Flatly, Journal, Lumen, Paper,
   //     Readable, Sandstone, Simplex, Slate, Spacelab, Superhero, United, Yeti
   // theme (see /public/themes for available themes)
-  "theme": "Cyborg",
+  "theme": "Readable",
 
   // port to listen for requests on.
   "port" : 3001,
@@ -47,7 +47,7 @@
   // wallet settings
   "wallet": {
     "host": "localhost",
-    "port": 9332,
+    "port": 9192,
     "user": "",
     "pass": ""
   },
@@ -81,10 +81,10 @@
 
   // ensure links on API page are valid
   "api": {
-    "blockindex": 203334,
-    "blockhash": "8a7302115fdef14838b87db7d57769e8bcd20a8408fa8df9ac103531b7c5a1c6",
-    "txhash": "eaa981115e35c18d91267cc15c8d605f6830a46e7a9894c5825d275bc18e7f5f",
-    "address": "NUVFnP9MtegCrApKzSJsvie9bYxs7Js13b"
+    "blockindex": 165,
+    "blockhash": "000003a3e13e1a997883b36daa8a021deccac84912d06b890289f5bc58782fc7",
+    "txhash": "5af69c11bd0470be778126f15203d577fb4ff524c14c67948d1772573cbb096d",
+    "address": "sXum72JoWXkg9Wpq2gUbgVLsTUGhF7qPqk"
   },
 
   // market settings
@@ -121,8 +121,8 @@
   "googleplus": "yourgooglepluspage",
 
   //genesis
-  "genesis_tx": "d611ad6808864e0e9bd331f3ffa2298c9e13a54d9fe59a99ccb3a75db374b7c9",
-  "genesis_block": "000001e1a5a4257154c65b46fc732bfa637ba7a898525373ba32ec4aa79921dd",
+  "genesis_tx": "b9e8be7516d514a733a481dc7db4fa04e89b59e0407e99292337cf28d40dcaae",
+  "genesis_block": "000005aac3776a054d1d4c2e2c8e2f251591b9edc586107f5adfb5e693f305d6",
 
   //heavy (enable/disable additional heavy features)
   "heavy": false,
