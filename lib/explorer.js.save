@@ -364,154 +364,31 @@ module.exports = {
     }
   },
 
-  get_input_addresses2: function(original_tx, original_txid, input, vout, cb) {
-    var addresses = [];
-    //console.log("get_input_addresses2() orig_txid=%s",original_txid);
-    if (input.coinbase) {
-      var amount = 0;
-      module.exports.syncLoop(vout.length, function (loop) {
-        var i = loop.iteration();
-          amount = amount + parseFloat(vout[i].value);
-          loop.next();
-      }, function(){
-        addresses.push({hash: 'coinbase', amount: amount});
-        return cb(addresses);
-      });
-    } else {
-      if (original_txid == input.txid) {
-        //console.log("same txid");
-        var tx = original_tx;
-        if (tx) {
-          module.exports.syncLoop(tx.vout.length, function (loop) {
-            var i = loop.iteration();
-            if (tx.vout[i].n == input.vout) {
-              //module.exports.convert_to_satoshi(parseFloat(tx.vout[i].value), function(amount_sat){
-              if (tx.vout[i].scriptPubKey.addresses) {
-                addresses.push({hash: tx.vout[i].scriptPubKey.addresses[0], amount:tx.vout[i].value});
-              }
-              loop.break(true);
-              loop.next();
-              //});
-            } else {
-              loop.next();
-            }
-          }, function(){
-              return cb(addresses);
-            });
-        } else {
-          return cb();
-        }
-      } else {
-        //console.log("different orig=%s txid=%s",original_txid,input.txid);
-        module.exports.get_rawtransaction(input.txid, function(tx){
-        if (tx) {
-          module.exports.syncLoop(tx.vout.length, function (loop) {
-            var i = loop.iteration();
-            if (tx.vout[i].n == input.vout) {
-              //module.exports.convert_to_satoshi(parseFloat(tx.vout[i].value), function(amount_sat){
-              if (tx.vout[i].scriptPubKey.addresses) {
-                addresses.push({hash: tx.vout[i].scriptPubKey.addresses[0], amount:tx.vout[i].value});
-              }
-              loop.break(true);
-              loop.next();
-              //});
-            } else {
-              loop.next();
-            }
-          }, function(){
-              return cb(addresses);
-            });
-          } else {
-            return cb();
-          }
-        });
-      }
-    }
-  },
-
   prepare_vin: function(tx, cb) {
     var arr_vin = [];
-    var prev_txid;
-    var prev_tx;
-    //console.log("prepare_vin() for %d loop",tx.vin.length);
     module.exports.syncLoop(tx.vin.length, function (loop) {
       var i = loop.iteration();
-      if (tx.vin[i].txid) {
-        if (tx.vin[i].txid == prev_txid) {
-          module.exports.get_input_addresses2(prev_tx, prev_txid, tx.vin[i], tx.vout, function(addresses){
-            if (addresses && addresses.length) {
-              //console.log('vin');
-              module.exports.is_unique(arr_vin, addresses[0].hash, function(unique, index) {
-                if (unique == true) {
-                  module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                    arr_vin.push({addresses:addresses[0].hash, amount:amount_sat});
-                    loop.next();
-                  });
-                } else {
-                  module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                    arr_vin[index].amount = arr_vin[index].amount + amount_sat;
-                    loop.next();
-                  });
-                }
+      module.exports.get_input_addresses(tx.vin[i], tx.vout, function(addresses){
+        if (addresses && addresses.length) {
+          //console.log('vin');
+          module.exports.is_unique(arr_vin, addresses[0].hash, function(unique, index) {
+            if (unique == true) {
+              module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
+                arr_vin.push({addresses:addresses[0].hash, amount:amount_sat});
+                loop.next();
               });
             } else {
-              loop.next();
+              module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
+                arr_vin[index].amount = arr_vin[index].amount + amount_sat;
+                loop.next();
+              });
             }
           });
         } else {
-          prev_txid = tx.vin[i].txid;
-          module.exports.get_rawtransaction(tx.vin[i].txid, function(original_tx){
-            if (original_tx) {
-              prev_tx = original_tx;
-              //console.log("calling get_input_address2(%s)",tx.vin[i].txid);
-              module.exports.get_input_addresses2(original_tx, tx.vin[i].txid, tx.vin[i], tx.vout, function(addresses){
-                if (addresses && addresses.length) {
-                  //console.log('vin');
-                  module.exports.is_unique(arr_vin, addresses[0].hash, function(unique, index) {
-                    if (unique == true) {
-                      module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                        arr_vin.push({addresses:addresses[0].hash, amount:amount_sat});
-                        loop.next();
-                      });
-                    } else {
-                      module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                        arr_vin[index].amount = arr_vin[index].amount + amount_sat;
-                        loop.next();
-                      });
-                    }
-                  });
-                } else {
-                  loop.next();
-                }
-              });
-            }
-          });
+          loop.next();
         }
-      } else {
-        //console.log("calling get_input_address()");
-        module.exports.get_input_addresses(tx.vin[i], tx.vout, function(addresses){
-          if (addresses && addresses.length) {
-            //console.log('vin');
-            module.exports.is_unique(arr_vin, addresses[0].hash, function(unique, index) {
-              if (unique == true) {
-                module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                  arr_vin.push({addresses:addresses[0].hash, amount:amount_sat});
-                  loop.next();
-                });
-              } else {
-                module.exports.convert_to_satoshi(parseFloat(addresses[0].amount), function(amount_sat){
-                  arr_vin[index].amount = arr_vin[index].amount + amount_sat;
-                  loop.next();
-                });
-              }
-            });
-          } else {
-            loop.next();
-          }
-        });
-      }
+      });
     }, function(){
-      //console.log("returing array()");
       return cb(arr_vin);
     });
   },
